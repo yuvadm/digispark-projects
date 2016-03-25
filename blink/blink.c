@@ -1,5 +1,6 @@
 #include <avr/eeprom.h>
 #include <avr/io.h>
+#define F_CPU 16500000L  // 16.5 MHZ
 #include <util/delay.h>
 
 int main() {
