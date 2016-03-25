@@ -6,11 +6,26 @@
 
 #include <util/delay.h>
 
+#define USB_LED_OFF 0
+#define USB_LED_ON  1
+
 USB_PUBLIC uchar usbFunctionSetup(uchar data[8]) {
-	return 0; // do nothing for now
+	usbRequest_t *rq = (void *)data;
+
+	switch(rq->bRequest) {
+		case USB_LED_ON:
+			PORTB |= 1;
+			return 0;
+		case USB_LED_OFF:
+			PORTB &= ~1;
+			return 0;
+	}
+
+	return 0;
 }
 
 int main() {
+	DDRB = 1;
 	uchar i;
 	wdt_enable(WDTO_1S);
 
