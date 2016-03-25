@@ -25,3 +25,7 @@ $ cd blink
 $ make clean && make
 $ micronucleus hello.hex
 ```
+
+## License
+
+[GPLv3](LICENSE)
