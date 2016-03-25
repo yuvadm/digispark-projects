@@ -2,6 +2,9 @@
 
 Various code for the [Digispark](http://digistump.com/wiki/digispark)
 
+ - [Blink](blink) - a simple blinking LED example
+ - [Keyboard](keyboard) - a basic USB device that flips the LED based on USB interrupts
+
 ## Prerequisites
 
  - avr-gcc
