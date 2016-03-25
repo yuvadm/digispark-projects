@@ -1,8 +1,6 @@
-
 #include <avr/eeprom.h>
 #include <avr/io.h>
 #include <util/delay.h>
-
 
 int main() {
 	DDRB |= _BV(DDB1);
@@ -13,4 +11,3 @@ int main() {
 		_delay_ms(900);
 	}
 }
-
