@@ -6,10 +6,10 @@ OBJFLAGS = -j .text -j .data -O ihex
 
 OBJECTS = usbdrv/usbdrv.o usbdrv/oddebug.o usbdrv/usbdrvasm.o keyboard.o
 
-all: keyboard.hex
+all: keyboard.hex usbtest
 
 clean:
-	$(RM) *.o *.hex *.elf usbdrv/*.o
+	$(RM) *.o *.hex *.elf usbdrv/*.o usbtest
 
 %.hex: %.elf
 	$(OBJCOPY) $(OBJFLAGS) $< $@
@@ -24,3 +24,6 @@ $(OBJECTS): usbdrv/usbconfig.h
 
 %.o: %.S
 	$(CC) $(CFLAGS) -x assembler-with-cpp -c $< -o $@
+
+usbtest:
+	gcc $(pkg-config --libs libusb) -O -Wall usbtest.c -o usbtest -lusb
