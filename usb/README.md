@@ -1,4 +1,4 @@
-# Keyboard
+# USB
 
 Neat and simple example of how the digispark can become a USB device and react to interrupts. Heavily based on http://codeandlife.com/2012/01/29/avr-attiny-usb-tutorial-part-3/
 
@@ -8,7 +8,7 @@ Build the program and flash it as usual to the digispark.
 
 ```bash
 $ make clean && make
-$ micronucleus keyboard.hex
+$ micronucleus usb.hex
 ```
 
 After the program loads, you should see a new USB device:

@@ -4,9 +4,9 @@ OBJCOPY = avr-objcopy
 CFLAGS = -Wall -Os -Iusbdrv -mmcu=attiny85 -DF_CPU=16500000
 OBJFLAGS = -j .text -j .data -O ihex
 
-OBJECTS = usbdrv/usbdrv.o usbdrv/oddebug.o usbdrv/usbdrvasm.o keyboard.o
+OBJECTS = usbdrv/usbdrv.o usbdrv/oddebug.o usbdrv/usbdrvasm.o usb.o
 
-all: keyboard.hex usbtest
+all: usb.hex usbtest
 
 clean:
 	$(RM) *.o *.hex *.elf usbdrv/*.o usbtest
@@ -14,7 +14,7 @@ clean:
 %.hex: %.elf
 	$(OBJCOPY) $(OBJFLAGS) $< $@
 
-keyboard.elf: $(OBJECTS)
+usb.elf: $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o $@
 
 $(OBJECTS): usbdrv/usbconfig.h
