@@ -4,7 +4,6 @@
 
 #include "usbdrv.h"
 
-#define F_CPU 16500000L  // 16.5 MHZ
 #include <util/delay.h>
 
 USB_PUBLIC uchar usbFunctionSetup(uchar data[8]) {
@@ -13,7 +12,7 @@ USB_PUBLIC uchar usbFunctionSetup(uchar data[8]) {
 
 int main() {
 	uchar i;
-	wdt_enable(WDT0_1S);
+	wdt_enable(WDTO_1S);
 
 	usbInit();
 

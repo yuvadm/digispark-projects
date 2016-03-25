@@ -1,7 +1,7 @@
 CC = avr-gcc
 OBJCOPY = avr-objcopy
 
-CFLAGS = -Wall -Os -Iusbdrv -mmcu=attiny85
+CFLAGS = -Wall -Os -Iusbdrv -mmcu=attiny85 -DF_CPU=16500000
 OBJFLAGS = -j .text -j .data -O ihex
 
 OBJECTS = usbdrv/usbdrv.o usbdrv/oddebug.o usbdrv/usbdrvasm.o keyboard.o
