@@ -1,8 +1,26 @@
+CC = avr-gcc
+OBJCOPY = avr-objcopy
 
-default:
-	# compile for attiny85 with warnings, optimizations, and 16.5MHz clock frequency
-	avr-gcc -Wall -Os -mmcu=attiny85 -o keyboard.o keyboard.c
-	avr-objcopy -j .text -j .data -O ihex keyboard.o keyboard.hex
+CFLAGS = -Wall -Os -Iusbdrv -mmcu=attiny85
+OBJFLAGS = -j .text -j .data -O ihex
 
-clean: /dev/null
-	rm -f keyboard.o keyboard.hex
+OBJECTS = usbdrv/usbdrv.o usbdrv/oddebug.o usbdrv/usbdrvasm.o keyboard.o
+
+all: keyboard.hex
+
+clean:
+	$(RM) *.o *.hex *.elf usbdrv/*.o
+
+%.hex: %.elf
+	$(OBJCOPY) $(OBJFLAGS) $< $@
+
+keyboard.elf: $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $@
+
+$(OBJECTS): usbdrv/usbconfig.h
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+%.o: %.S
+	$(CC) $(CFLAGS) -x assembler-with-cpp -c $< -o $@
