@@ -150,6 +150,9 @@ int main() {
 		wdt_reset(); // keep the watchdog happy
 		usbPoll();
 
+		continue; // stop here for now
+		/////////////////////////////
+
 		if (!(PINB & (1<<PB1))) { // button pressed (PB1 at ground voltage)
 			// also check if some time has elapsed since last button press
 			if (state == STATE_WAIT && button_release_counter == 255)
