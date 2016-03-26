@@ -65,26 +65,26 @@ volatile static uchar LED_state = 0xff; // received from PC
 static uchar idleRate; // repeat rate for keyboards
 
 usbMsgLen_t usbFunctionSetup(uchar data[8]) {
-    usbRequest_t *rq = (void *)data;
+	usbRequest_t *rq = (void *)data;
 
-    if((rq->bmRequestType & USBRQ_TYPE_MASK) == USBRQ_TYPE_CLASS) {
-        switch(rq->bRequest) {
-        case USBRQ_HID_GET_REPORT: // send "no keys pressed" if asked here
-            // wValue: ReportType (highbyte), ReportID (lowbyte)
-            usbMsgPtr = (void *)&keyboard_report; // we only have this one
-            keyboard_report.modifier = 0;
-            keyboard_report.keycode[0] = 0;
-            return sizeof(keyboard_report);
-		case USBRQ_HID_SET_REPORT: // if wLength == 1, should be LED state
-            return (rq->wLength.word == 1) ? USB_NO_MSG : 0;
-        case USBRQ_HID_GET_IDLE: // send idle rate to PC as required by spec
-            usbMsgPtr = &idleRate;
-            return 1;
-        case USBRQ_HID_SET_IDLE: // save idle rate as required by spec
-            idleRate = rq->wValue.bytes[1];
-            return 0;
-        }
-    }
+	if ((rq->bmRequestType & USBRQ_TYPE_MASK) == USBRQ_TYPE_CLASS) {
+		switch (rq->bRequest) {
+			case USBRQ_HID_GET_REPORT: // send "no keys pressed" if asked here
+				// wValue: ReportType (highbyte), ReportID (lowbyte)
+				usbMsgPtr = (void *)&keyboard_report; // we only have this one
+				keyboard_report.modifier = 0;
+				keyboard_report.keycode[0] = 0;
+				return sizeof(keyboard_report);
+			case USBRQ_HID_SET_REPORT: // if wLength == 1, should be LED state
+				return (rq->wLength.word == 1) ? USB_NO_MSG : 0;
+			case USBRQ_HID_GET_IDLE: // send idle rate to PC as required by spec
+				usbMsgPtr = &idleRate;
+				return 1;
+			case USBRQ_HID_SET_IDLE: // save idle rate as required by spec
+				idleRate = rq->wValue.bytes[1];
+				return 0;
+		}
+	}
 
     return 0; // by default don't return any data
 }
@@ -95,15 +95,14 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 
 usbMsgLen_t usbFunctionWrite(uint8_t * data, uchar len) {
 	if (data[0] == LED_state)
-        return 1;
-    else
-        LED_state = data[0];
-
-    // LED state changed
-	if(LED_state & CAPS_LOCK)
-		PORTB |= 1 << PB0; // LED on
+		return 1;
 	else
-		PORTB &= ~(1 << PB0); // LED off
+		LED_state = data[0];
+
+	if (LED_state & CAPS_LOCK)
+		PORTB |= _BV(PB1); // LED on
+	else
+		PORTB &= ~_BV(PB1); // LED off
 
 	return 1; // Data read, not expecting more
 }
@@ -112,7 +111,7 @@ usbMsgLen_t usbFunctionWrite(uint8_t * data, uchar len) {
 void buildReport(uchar send_key) {
 	keyboard_report.modifier = 0;
 
-	if(send_key >= 'a' && send_key <= 'z')
+	if (send_key >= 'a' && send_key <= 'z')
 		keyboard_report.keycode[0] = 4+(send_key-'a');
 	else
 		keyboard_report.keycode[0] = 0;
@@ -125,34 +124,35 @@ void buildReport(uchar send_key) {
 int main() {
 	uchar i, button_release_counter = 0, state = STATE_WAIT;
 
-	DDRB = 1 << PB0; // PB0 as output
-	PORTB = 1 << PB1; // PB1 is input with internal pullup resistor activated
+	DDRB |= _BV(DDB1);
 
-    for(i=0; i<sizeof(keyboard_report); i++) // clear report initially
-        ((uchar *)&keyboard_report)[i] = 0;
+	for(i=0; i<sizeof(keyboard_report); i++) // clear report initially
+		((uchar *)&keyboard_report)[i] = 0;
 
-    wdt_enable(WDTO_1S); // enable 1s watchdog timer
+	wdt_enable(WDTO_1S); // enable 1s watchdog timer
 
-    usbInit();
+	usbInit();
 
-    usbDeviceDisconnect(); // enforce re-enumeration
-    for(i = 0; i<250; i++) { // wait 500 ms
-        wdt_reset(); // keep the watchdog happy
-        _delay_ms(2);
-    }
-    usbDeviceConnect();
+	usbDeviceDisconnect(); // enforce re-enumeration
+	
+	for (i=0; i<250; i++) { // wait 500 ms
+		wdt_reset(); // keep the watchdog happy
+		_delay_ms(2);
+	}
+	
+	usbDeviceConnect();
 
-    TCCR0B |= (1 << CS01); // timer 0 at clk/8 will generate randomness
+	TCCR0B |= (1 << CS01); // timer 0 at clk/8 will generate randomness
 
-    sei(); // Enable interrupts after re-enumeration
+	sei(); // Enable interrupts after re-enumeration
 
-    while(1) {
-        wdt_reset(); // keep the watchdog happy
-        usbPoll();
+	while (1) {
+		wdt_reset(); // keep the watchdog happy
+		usbPoll();
 
-		if(!(PINB & (1<<PB1))) { // button pressed (PB1 at ground voltage)
+		if (!(PINB & (1<<PB1))) { // button pressed (PB1 at ground voltage)
 			// also check if some time has elapsed since last button press
-			if(state == STATE_WAIT && button_release_counter == 255)
+			if (state == STATE_WAIT && button_release_counter == 255)
 				state = STATE_SEND_KEY;
 
 			button_release_counter = 0; // now button needs to be released a while until retrigger
@@ -161,26 +161,26 @@ int main() {
 		if(button_release_counter < 255)
 			button_release_counter++; // increase release counter
 
-        // characters are sent when messageState == STATE_SEND and after receiving
-        // the initial LED state from PC (good way to wait until device is recognized)
-        if(usbInterruptIsReady() && state != STATE_WAIT && LED_state != 0xff){
+        	// characters are sent when messageState == STATE_SEND and after receiving
+        	// the initial LED state from PC (good way to wait until device is recognized)
+        	if (usbInterruptIsReady() && state != STATE_WAIT && LED_state != 0xff) {
 			switch(state) {
-			case STATE_SEND_KEY:
-				buildReport('x');
-				state = STATE_RELEASE_KEY; // release next
-				break;
-			case STATE_RELEASE_KEY:
-				buildReport(NULL);
-				state = STATE_WAIT; // go back to waiting
-				break;
-			default:
-				state = STATE_WAIT; // should not happen
+				case STATE_SEND_KEY:
+					buildReport('x');
+					state = STATE_RELEASE_KEY; // release next
+					break;
+				case STATE_RELEASE_KEY:
+					buildReport(NULL);
+					state = STATE_WAIT; // go back to waiting
+					break;
+				default:
+					state = STATE_WAIT; // should not happen
 			}
 
 			// start sending
-            usbSetInterrupt((void *)&keyboard_report, sizeof(keyboard_report));
-        }
-    }
+			usbSetInterrupt((void *)&keyboard_report, sizeof(keyboard_report));
+        	}
+    	}
 
     return 0;
 }
