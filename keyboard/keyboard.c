@@ -122,7 +122,7 @@ void buildReport(uchar send_key) {
 #define STATE_RELEASE_KEY 2
 
 int main() {
-	uchar i, button_release_counter = 0, state = STATE_WAIT;
+	uchar i, button_release_counter = 0, state = STATE_SEND_KEY;
 
 	DDRB |= _BV(DDB1);
 
@@ -150,22 +150,6 @@ int main() {
 		wdt_reset(); // keep the watchdog happy
 		usbPoll();
 
-		continue; // stop here for now
-		/////////////////////////////
-
-		if (!(PINB & (1<<PB1))) { // button pressed (PB1 at ground voltage)
-			// also check if some time has elapsed since last button press
-			if (state == STATE_WAIT && button_release_counter == 255)
-				state = STATE_SEND_KEY;
-
-			button_release_counter = 0; // now button needs to be released a while until retrigger
-		}
-
-		if(button_release_counter < 255)
-			button_release_counter++; // increase release counter
-
-        	// characters are sent when messageState == STATE_SEND and after receiving
-        	// the initial LED state from PC (good way to wait until device is recognized)
         	if (usbInterruptIsReady() && state != STATE_WAIT && LED_state != 0xff) {
 			switch(state) {
 				case STATE_SEND_KEY:
