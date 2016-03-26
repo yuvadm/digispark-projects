@@ -27,3 +27,5 @@ $ dmesg | tail
 [3333] input: y3xz.com keyboard as /devices/pci0000:00/0000:00:14.0/usb1/1-2/1-2:1.0/0003:4242:E131.0009/input/input16
 [4444] hid-generic 0003:4242:E131.0009: input,hidraw5: USB HID v1.01 Keyboard [y3xz.com keyboard] on usb-0000:00:14.0-2/input0
 ```
+
+The canonical LED toggle is now controlled by the Caps Lock key!

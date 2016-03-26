@@ -4,7 +4,7 @@ Various code for the [Digispark](http://digistump.com/wiki/digispark)
 
  - [Blink](blink) - a simple blinking LED example, start here
  - [USB](usb) - a basic USB device that flips the LED based on USB interrupts
- - [Keyboard](keyboard) - a USB HID keyboard example
+ - [Keyboard](keyboard) - a USB HID keyboard example, LED toggled via Caps Lock key
 
 ## Prerequisites
 
