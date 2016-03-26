@@ -155,10 +155,12 @@ int main() {
 				case STATE_SEND_KEY:
 					buildReport('x');
 					state = STATE_RELEASE_KEY; // release next
+					PORTB |= _BV(PB1);
 					break;
 				case STATE_RELEASE_KEY:
 					buildReport(NULL);
 					state = STATE_WAIT; // go back to waiting
+					PORTB &= ~_BV(PB1);
 					break;
 				default:
 					state = STATE_WAIT; // should not happen
